@@ -15,7 +15,7 @@ import Sliding, argparse
 def bfs_map(value):
     """ YOUR CODE HERE """
 
-    value[1] += 1 #
+    level += 1 #
        # get children, make tuples, make a list
     resultList = []
     result.append(value) #ensure parent is linked with children below
