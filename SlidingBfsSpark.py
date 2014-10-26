@@ -14,16 +14,17 @@ import Sliding, argparse
 #return list of kv pairs 
 def bfs_map(value):
     """ YOUR CODE HERE """
-        level += 1
-        # get children, make tuples, make a list
-        resultList = []
-        result.append(value) #ensure parent is linked with children below
-        result.append( Sliding.children().flatMap( lambda x: (x,level) ) )#get first item of board
+
+    value[1] += 1 #
+       # get children, make tuples, make a list
+    resultList = []
+    result.append(value) #ensure parent is linked with children below
+    result.append(map(lambda x: (x,level), Sliding.children(WIDTH, HEIGHT, value[0]) ))#get first item of board
 #        RDD.flatMap(lambda x: (x, level))
     return result # for bfs_reduce
   
 # do an operation on every single item, two at a time
-# want reduce to go back into map 
+# want reduce to go back into map s
 # remove copies of moves here/filter 
 
 # reduceByKey returns many similar boards, use write bfs_reduce to get minimum key, 
@@ -64,13 +65,13 @@ def solve_sliding_puzzle(master, output, height, width):
 
     #while RDD hasn't changed/ while level hasn't changed? /size of tree is no longer changing?/ RDD.count()
 
-    oldSize = RDD.count()
-    newSize = RDD.count()
+    oldSize, newSize = RDD.count(), RDD.count()
 
-    while RDD.count(): 
+    while 1: 
         if newSize == oldSize:
             break
         else:
+#            level += 1
             oldSize = RDD.count() 
             RDD.flatMap(bfs_map).reduceByKey(bfs_reduce)
             newSize = RDD.count()
