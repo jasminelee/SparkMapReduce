@@ -14,21 +14,25 @@ import Sliding, argparse
 #return list of kv pairs 
 def bfs_map(value):
     """ YOUR CODE HERE """
-    print"--------Just entered bfs_map---------"
-    print "the value of level in bfs_map is:%d" % level
+
        # get children, make tuples, make a list
-    result = []
+    resultList = []
     result.append(value) #ensure parent is linked with children below
-    print "value of value: "
-    # this should print a tuple with ((A,B,C, -), 0)
-    print value
-    
-    result.extend(map(lambda x: (x,level), Sliding.children(WIDTH, HEIGHT, value[0] )))#get first item of board
+    result.append(map(lambda x: (x,level), Sliding.children(WIDTH, HEIGHT, value[0]) ))#get first item of board
+#        RDD.flatMap(lambda x: (x, level))
     return result # for bfs_reduce
   
+# do an operation on every single item, two at a time
+# want reduce to go back into map s
+# remove copies of moves here/filter 
+
+# reduceByKey returns many similar boards, use write bfs_reduce to get minimum key, 
+
 def bfs_reduce(value1, value2):
     """ YOUR CODE HERE """
+    # reduceByKey reduces matching tuples together. use min? 
     return min(value1, value2)
+    #RDD.reduceByKey(lambda a, b: a[0] == b[0], (value1[0] value2[0])) #if keys are equal remove
 
 def solve_sliding_puzzle(master, output, height, width):
     """
@@ -44,36 +48,33 @@ def solve_sliding_puzzle(master, output, height, width):
     # Global constants that will be shared across all map and reduce instances.
     # You can also reference these in any helper functions you write.
     global HEIGHT, WIDTH, level
-    
-    print "wut\n\n\n\n\n\n\n\n"
-    
+
     # Initialize global constants
     HEIGHT=height
     WIDTH=width
-    level = 0
-    print("the value of level after initialization is: %d") % level
-    # this "constant" will change, but it remains constant for every MapReduce job
+    level = 0 # this "constant" will change, but it remains constant for every MapReduce job
 
     # The solution configuration for this sliding puzzle. You will begin exploring the tree from this node
     sol = Sliding.solution(WIDTH, HEIGHT)
+
+
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
-    sol = (sol, level) #create initial tuple of solution board, level)
-    temp = [] 
-    temp.append(sol)
-    print "root after initialization is: xxxxxxxxxxxxxxxxxx "
-    print temp
-    RDD = sc.parallelize(temp) #or bfs_map(sol)?
+    sol = (sol, 0) #create initial tuple of solution board, level)
+    RDD = sc.parallelize(bfs_map(sol))
 
-    oldSize, newSize = 0, 1
+    #while RDD hasn't changed/ while level hasn't changed? /size of tree is no longer changing?/ RDD.count()
 
-    while oldSize < newSize: 
-        level += 1 
-        print "the value of level inside the loop is: %d" % level
-        oldSize = RDD.count() 
-        RDD = RDD.flatMap(bfs_map).reduceByKey(bfs_reduce)
-        newSize = RDD.count()
-        print "value of newSize after mapreduce----------------------"
-        print newSize
+    oldSize, newSize = RDD.count(), RDD.count()
+
+    while 1: 
+        level +=1
+        if newSize == oldSize:
+            break
+        else:
+#            level += 1
+            oldSize = RDD.count() 
+            RDD = RDD.flatMap(bfs_map).reduceByKey(bfs_reduce)
+            newSize = RDD.count()
 
     RDD.collect() #lazyeval
 
@@ -86,11 +87,12 @@ def solve_sliding_puzzle(master, output, height, width):
 
 
     """ YOUR OUTPUT CODE HERE """
-    for x in RDD:
+    for x in RDDarray:
         str(x)
         x.output
 
     sc.stop()
+
 
 
 """ DO NOT EDIT PAST THIS LINE
