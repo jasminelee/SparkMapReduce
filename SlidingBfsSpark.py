@@ -14,8 +14,8 @@ import Sliding, argparse
 #return list of kv pairs 
 def bfs_map(value):
     """ YOUR CODE HERE """
-
-    value[1] += 1 #
+    level +=1
+#    value[1] += 1 #
        # get children, make tuples, make a list
     resultList = []
     result.append(value) #ensure parent is linked with children below
